@@ -1,0 +1,48 @@
+#!/bin/sh
+if [ "$TAILSCALE_NODE_PREFIX" = "" ] ; then
+    echo "FATAL: TAILSCALE_NODE_PREFIX environment variable is not set"
+    exit 1
+fi
+if [ "$TAILSCALE_AUTHKEY" = "" ] ; then
+    echo "FATAL: TAILSCALE_AUTHKEY environment variable is not set"
+    exit 1
+fi
+if [ "$TAILSCALE_SOCKS5_PROXY_PORT" = "" ] ; then
+    export TAILSCALE_SOCKS5_PROXY_PORT=1055
+fi
+tmpdir="/tmp/tailscale-`./uuidgen`"
+mkdir -p $tmpdir
+if [ -e /tmp/tailscale ] ; then
+    rm -f /tmp/tailscale
+fi
+ln -s $tmpdir /tmp/tailscale
+if [ "$TAILSCALE_USE_IPV6" = "true" ] ; then
+    export SOCKS5_PROXY="[::1]:$TAILSCALE_SOCKS5_PROXY_PORT"
+    export HOSTNAME="$TAILSCALE_NODE_PREFIX-`./uuidgen`"
+else
+    export SOCKS5_PROXY=127.0.0.1:$TAILSCALE_SOCKS5_PROXY_PORT
+    export HOSTNAME="$TAILSCALE_NODE_PREFIX-`./uuidgen`"
+fi
+/var/runtime/tailscaled --tun=userspace-networking --socks5-server=$SOCKS5_PROXY --statedir $tmpdir 2>&1 | tee /tmp/stdout &
+echo "tailscaled started, waiting for tailscale up to succeed"
+i=0
+if [ "$TAILSCALE_CONNECT_TIMEOUT" = "" ] ; then
+    export TAILSCALE_CONNECT_TIMEOUT=60
+fi
+timeout=$TAILSCALE_CONNECT_TIMEOUT
+until /var/runtime/tailscale up --auth-key=${TAILSCALE_AUTHKEY} --hostname="$HOSTNAME" --force-reauth
+do
+    echo "tailscale up failed, pausing for 3s..."
+    sleep 3
+    i=$((i + 3))
+    if [ $i -ge $timeout ] ; then
+        echo "tailscale up failed after $timeout seconds, exiting"
+        exit 1
+    fi
+done
+if [ -e bootstrap ] ; then
+    echo "executing custom bootstrap script: ./bootstrap"
+    ./bootstrap
+fi
+echo "tailscale up, executing lambda function"
+exec /var/lang/bin/python3 -m awslambdaric "$@"
