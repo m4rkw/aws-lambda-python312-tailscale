@@ -9,10 +9,10 @@ on the tailnet.
 ## Configuration - environment variables
 
 ````
-TAILSCALE_NODE_PREFIX=""            # prefix for the tailscale node name, will have a
+TAILSCALE_NODE_PREFIX="mynode"      # prefix for the tailscale node name, will have a
                                     # random suffix appended to it
-TAILSCALE_AUTHKEY=""                # authkey to use for connecting to the tailnet
-TAILSCALE_USE_IPV6=""               # use IPV6 networking
+TAILSCALE_AUTHKEY="myauthkey"       # authkey to use for connecting to the tailnet
+TAILSCALE_USE_IPV6="true"           # use IPV6 networking instead of IPV4
 TAILSCALE_SOCKS5_PROXY_PORT=1055    # port for the SOCKS5 proxy endpoint
 ````
 
