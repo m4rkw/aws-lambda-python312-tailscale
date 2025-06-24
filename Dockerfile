@@ -1,5 +1,5 @@
 FROM amazonlinux:2023 AS builder
-RUN dnf install -y gcc python3.12 python3.12-devel mariadb-connector-c-devel mariadb-connector-c pkgconf-pkg-config && dnf clean all
+RUN dnf install -y gcc python3.12 python3.12-devel pkgconf-pkg-config && dnf clean all
 RUN yum groupinstall -y "Development Tools"
 RUN yum install -y gcc make openssl-devel readline-devel libproxy libproxy-devel && yum clean all
 
