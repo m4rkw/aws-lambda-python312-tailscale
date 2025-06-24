@@ -29,5 +29,3 @@ ADD tailscale_bootstrap /var/task/tailscale_bootstrap
 ADD uuidgen /var/task/uuidgen
 
 ENTRYPOINT [ "/var/task/tailscale_bootstrap" ]
-
-CMD ["/usr/bin/scat"]
