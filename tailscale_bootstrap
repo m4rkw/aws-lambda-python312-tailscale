@@ -7,6 +7,11 @@ if [ "$TAILSCALE_AUTHKEY" = "" ] ; then
     echo "FATAL: TAILSCALE_AUTHKEY environment variable is not set"
     exit 1
 fi
+echo "$TAILSCALE_AUTHKEY" | egrep '^authkey:[a-z]+$' 1>/dev/null
+if [ $? -eq 0 ] ; then
+    echo "FATAL: TAILSCALE_AUTHKEY is not a valid auth key"
+    exit 1
+fi
 if [ "$TAILSCALE_SOCKS5_PROXY_PORT" = "" ] ; then
     export TAILSCALE_SOCKS5_PROXY_PORT=1055
 fi

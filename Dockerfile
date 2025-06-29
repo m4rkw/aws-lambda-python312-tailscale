@@ -14,6 +14,7 @@ RUN make
 FROM public.ecr.aws/lambda/python:3.12
 
 COPY --from=builder /root/socat-1.8.0.3/socat /usr/bin/socat
+COPY --from=builder /usr/bin/patch /usr/bin/patch
 
 ENV LAMBDA_TASK_ROOT=/var/task
 ENV PYTHONPATH=$LAMBDA_TASK_ROOT
